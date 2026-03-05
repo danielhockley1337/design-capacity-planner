@@ -543,10 +543,9 @@
       background: none;
       border: none;
       cursor: pointer;
-      padding: 2px 4px;
+      padding: 4px 5px;
       color: #ccc;
-      font-size: 14px;
-      line-height: 1;
+      line-height: 0;
       border-radius: 4px;
       transition: color 0.15s, background 0.15s;
     }
@@ -628,7 +627,18 @@
       <div class="card-header">
         <h2>Team Details</h2>
         <span class="count" id="teamCount"></span>
-        <button class="team-lock-btn locked" id="teamLockBtn" onclick="toggleTeamLock()" title="Unlock team settings">🔒</button>
+        <button class="team-lock-btn locked" id="teamLockBtn" onclick="toggleTeamLock()" title="Unlock team settings">
+          <!-- locked icon -->
+          <svg id="iconLocked" width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <rect x="1" y="7" width="12" height="9" rx="2" fill="currentColor"/>
+            <path d="M4 7V5a3 3 0 0 1 6 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          </svg>
+          <!-- unlocked icon -->
+          <svg id="iconUnlocked" width="14" height="16" viewBox="0 0 14 16" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none">
+            <rect x="1" y="7" width="12" height="9" rx="2" fill="currentColor"/>
+            <path d="M4 7V5a3 3 0 0 1 6 0V2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+          </svg>
+        </button>
       </div>
 
       <div id="teamSection" class="team-section-locked">
@@ -966,16 +976,20 @@
   function applyTeamLockUI() {
     const section = document.getElementById('teamSection');
     const btn = document.getElementById('teamLockBtn');
+    const iconLocked = document.getElementById('iconLocked');
+    const iconUnlocked = document.getElementById('iconUnlocked');
     if (teamLocked) {
       section.classList.add('team-section-locked');
-      btn.textContent = '🔒';
       btn.classList.add('locked');
       btn.title = 'Unlock team settings';
+      iconLocked.style.display = '';
+      iconUnlocked.style.display = 'none';
     } else {
       section.classList.remove('team-section-locked');
-      btn.textContent = '🔓';
       btn.classList.remove('locked');
       btn.title = 'Lock team settings';
+      iconLocked.style.display = 'none';
+      iconUnlocked.style.display = '';
     }
   }
 
