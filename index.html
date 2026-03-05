@@ -537,6 +537,27 @@
       width: 22px;
     }
 
+    /* ── Team Lock ── */
+    .team-lock-btn {
+      margin-left: auto;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 2px 4px;
+      color: #ccc;
+      font-size: 14px;
+      line-height: 1;
+      border-radius: 4px;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .team-lock-btn:hover { color: #888; background: #f0f0f0; }
+    .team-lock-btn.locked { color: #aaa; }
+
+    .team-section-locked .team-add-form { pointer-events: none; opacity: 0.45; }
+    .team-section-locked .team-hours-input { pointer-events: none; }
+    .team-section-locked .btn-danger { pointer-events: none; opacity: 0.35; }
+
   </style>
 </head>
 <body>
@@ -607,20 +628,23 @@
       <div class="card-header">
         <h2>Team Details</h2>
         <span class="count" id="teamCount"></span>
+        <button class="team-lock-btn locked" id="teamLockBtn" onclick="toggleTeamLock()" title="Unlock team settings">🔒</button>
       </div>
 
-      <div class="team-add-form">
-        <input type="text" id="newMemberName" placeholder="Name…" autocomplete="off">
-        <select id="newMemberLevel">
-          <option value="junior">Junior</option>
-          <option value="mid" selected>Mid</option>
-          <option value="senior">Senior</option>
-          <option value="lead">Lead</option>
-        </select>
-        <button class="btn btn-primary btn-sm" onclick="addTeamMember()" style="padding:8px 12px;">Add</button>
-      </div>
+      <div id="teamSection" class="team-section-locked">
+        <div class="team-add-form">
+          <input type="text" id="newMemberName" placeholder="Name…" autocomplete="off">
+          <select id="newMemberLevel">
+            <option value="junior">Junior</option>
+            <option value="mid" selected>Mid</option>
+            <option value="senior">Senior</option>
+            <option value="lead">Lead</option>
+          </select>
+          <button class="btn btn-primary btn-sm" onclick="addTeamMember()" style="padding:8px 12px;">Add</button>
+        </div>
 
-      <div class="team-list" id="teamList"></div>
+        <div class="team-list" id="teamList"></div>
+      </div>
     </div>
   </div>
 
@@ -918,6 +942,41 @@
     const portal = document.getElementById('rowMenuPortal');
     portal.classList.remove('open');
     openRowMenuIndex = null;
+  }
+
+  // ── Team Lock ──
+  const TEAM_PASSWORD = 'password';
+  let teamLocked = true;
+
+  function toggleTeamLock() {
+    if (teamLocked) {
+      const input = prompt('Enter password to unlock Team Details:');
+      if (input === null) return; // cancelled
+      if (input !== TEAM_PASSWORD) {
+        alert('Incorrect password.');
+        return;
+      }
+      teamLocked = false;
+    } else {
+      teamLocked = true;
+    }
+    applyTeamLockUI();
+  }
+
+  function applyTeamLockUI() {
+    const section = document.getElementById('teamSection');
+    const btn = document.getElementById('teamLockBtn');
+    if (teamLocked) {
+      section.classList.add('team-section-locked');
+      btn.textContent = '🔒';
+      btn.classList.add('locked');
+      btn.title = 'Unlock team settings';
+    } else {
+      section.classList.remove('team-section-locked');
+      btn.textContent = '🔓';
+      btn.classList.remove('locked');
+      btn.title = 'Lock team settings';
+    }
   }
 
   // ── Team CRUD ──
