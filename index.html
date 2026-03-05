@@ -625,7 +625,7 @@
   <div>
     <div class="card">
       <div class="card-header">
-        <h2>Team Details</h2>
+        <h2>Capacity</h2>
         <span class="count" id="teamCount"></span>
         <button class="team-lock-btn locked" id="teamLockBtn" onclick="toggleTeamLock()" title="Unlock team settings">
           <!-- locked icon -->
@@ -643,13 +643,7 @@
 
       <div id="teamSection" class="team-section-locked">
         <div class="team-add-form">
-          <input type="text" id="newMemberName" placeholder="Name…" autocomplete="off">
-          <select id="newMemberLevel">
-            <option value="junior">Junior</option>
-            <option value="mid" selected>Mid</option>
-            <option value="senior">Senior</option>
-            <option value="lead">Lead</option>
-          </select>
+          <input type="text" id="newMemberName" placeholder="Allocation…" autocomplete="off">
           <button class="btn btn-primary btn-sm" onclick="addTeamMember()" style="padding:8px 12px;">Add</button>
         </div>
 
@@ -664,8 +658,7 @@
   // ── Constants ──
   const SIZE_HOURS = { S: 80, M: 240, L: 480 };
   const SIZE_LABELS = { S: 'Small — 80h', M: 'Medium — 240h', L: 'Large — 480h' };
-  const LEVEL_DEFAULTS = { junior: 300, mid: 360, senior: 400, lead: 320 };
-  const LEVEL_LABELS = { junior: 'Junior', mid: 'Mid', senior: 'Senior', lead: 'Lead' };
+  const ALLOCATION_DEFAULT_HOURS = 2000;
   const SIZES = ['S', 'M', 'L'];
 
   // ── State ──
@@ -814,7 +807,7 @@
   function renderTeam() {
     const list = document.getElementById('teamList');
     const count = state.team.length;
-    document.getElementById('teamCount').textContent = count ? `${count} designer${count !== 1 ? 's' : ''}` : '';
+    document.getElementById('teamCount').textContent = count ? `${count} allocation${count !== 1 ? 's' : ''}` : '';
 
     if (count === 0) {
       list.innerHTML = '<div class="empty-state">No team members yet.</div>';
@@ -824,11 +817,10 @@
     list.innerHTML = state.team.map((m, i) => `
       <div class="team-row">
         <div class="team-name">${escHtml(m.name)}</div>
-        <div class="level-badge level-${m.level}">${LEVEL_LABELS[m.level]}</div>
         <input class="team-hours-input"
                type="number"
                min="0"
-               max="2000"
+               max="99999"
                value="${m.hours}"
                title="Quarterly hours"
                onchange="updateMemberHours(${i}, this.value)">
@@ -999,8 +991,7 @@
     const name = nameEl.value.trim();
     if (!name) { nameEl.focus(); return; }
 
-    const level = document.getElementById('newMemberLevel').value;
-    state.team.push({ id: uid(), name, level, hours: LEVEL_DEFAULTS[level] });
+    state.team.push({ id: uid(), name, hours: ALLOCATION_DEFAULT_HOURS });
     nameEl.value = '';
     nameEl.focus();
     save();
