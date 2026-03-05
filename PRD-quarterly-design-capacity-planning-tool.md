@@ -54,6 +54,10 @@ The primary working area. A dynamic, drag-and-drop ordered list of design initia
 
 The tool automatically calculates total available hours from the Team Details section and renders a visible horizontal divider in the initiative list at the point where cumulative hours first exceed total capacity. All initiatives above the line are **In Scope**; all initiatives at or below the line are **Out of Scope**. The line updates in real time as initiatives are reordered, added, removed, or resized.
 
+**Default state:**
+
+On first load (no `localStorage` data), the tool pre-populates a set of named initiatives drawn from real Dow Jones design work. All default entries are valid initiative names — no placeholder or junk data is included.
+
 **Initiative management:**
 
 - Add a new initiative (name + size) via an inline form at the top or bottom of the list
