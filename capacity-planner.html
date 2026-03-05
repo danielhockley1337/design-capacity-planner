@@ -1,0 +1,1058 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quarterly Design Capacity Planner</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+      background: #f0f2f5;
+      color: #1a1a1a;
+      min-height: 100vh;
+      padding: 32px 24px;
+      line-height: 1.5;
+    }
+
+    /* ── Layout ── */
+    .page-header {
+      max-width: 1200px;
+      margin: 0 auto 28px;
+    }
+
+    .page-header h1 {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .page-header .quarter-label {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 14px;
+      color: #555;
+    }
+
+    .quarter-label input {
+      font-size: 14px;
+      font-family: inherit;
+      border: none;
+      border-bottom: 1px dashed #bbb;
+      background: transparent;
+      color: #555;
+      width: 100px;
+      outline: none;
+      padding: 0 2px;
+    }
+
+    .quarter-label input:focus {
+      border-bottom-color: #4361ee;
+      color: #1a1a1a;
+    }
+
+    .layout {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 360px;
+      gap: 24px;
+      align-items: start;
+    }
+
+    @media (max-width: 900px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    /* ── Cards ── */
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.04);
+      overflow: hidden;
+    }
+
+    .card-header {
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .card-header h2 {
+      font-size: 17px;
+      font-weight: 600;
+    }
+
+    .card-header .count {
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* ── Capacity Summary ── */
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .summary-cell {
+      background: #fff;
+      padding: 16px 20px;
+      text-align: center;
+    }
+
+    .summary-cell .label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: #888;
+      margin-bottom: 4px;
+    }
+
+    .summary-cell .value {
+      font-size: 24px;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    .summary-cell.available .value { color: #1a1a1a; }
+    .summary-cell.committed .value { color: #4361ee; }
+    .summary-cell.remaining .value { color: #2ec4b6; }
+    .summary-cell.remaining.over .value { color: #e63946; }
+
+    /* ── Add Initiative Form ── */
+    .add-form {
+      display: flex;
+      gap: 8px;
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+    }
+
+    .add-form input[type="text"] {
+      flex: 1;
+      padding: 9px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: inherit;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .add-form input[type="text"]:focus { border-color: #4361ee; }
+
+    .size-toggle {
+      display: flex;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .size-toggle label {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 600;
+      color: #555;
+      transition: background 0.1s, color 0.1s;
+      user-select: none;
+    }
+
+    .size-toggle label:not(:last-child) { border-right: 1px solid #ddd; }
+
+    .size-toggle input[type="radio"] { display: none; }
+
+    .size-toggle input[type="radio"]:checked + span {
+      background: #4361ee;
+      color: #fff;
+    }
+
+    .size-toggle label span {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      height: 100%;
+      padding: 8px 0;
+      border-radius: 0;
+    }
+
+    .btn {
+      padding: 9px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.15s, opacity 0.15s;
+      white-space: nowrap;
+    }
+
+    .btn-primary { background: #4361ee; color: #fff; }
+    .btn-primary:hover { background: #3451d1; }
+    .btn-danger { background: #fff0f1; color: #e63946; }
+    .btn-danger:hover { background: #ffe0e2; }
+    .btn-ghost {
+      background: transparent;
+      color: #888;
+      border: 1px solid #e0e0e0;
+    }
+    .btn-ghost:hover { background: #f5f5f5; color: #333; }
+    .btn-sm { padding: 5px 10px; font-size: 12px; }
+
+    /* ── Initiative List ── */
+    .initiatives-list {
+      padding: 8px 0;
+      min-height: 60px;
+    }
+
+    .initiative-row {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      padding: 10px 24px;
+      border-bottom: 1px solid #f5f5f5;
+      transition: background 0.1s;
+      cursor: grab;
+      user-select: none;
+    }
+
+    .initiative-row:last-child { border-bottom: none; }
+    .initiative-row:hover { background: #fafafa; }
+    .initiative-row.dragging { opacity: 0.4; cursor: grabbing; }
+    .initiative-row.drag-over { background: #eef1ff; }
+
+    .initiative-row.out-of-scope {
+      opacity: 0.55;
+    }
+
+    .initiative-row.out-of-scope .initiative-name {
+      color: #888;
+    }
+
+    .rank {
+      width: 28px;
+      font-size: 12px;
+      color: #bbb;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .drag-handle {
+      width: 20px;
+      flex-shrink: 0;
+      color: #ccc;
+      font-size: 16px;
+      cursor: grab;
+      line-height: 1;
+      display: flex;
+      align-items: center;
+    }
+
+    .initiative-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+      padding: 0 8px;
+    }
+
+    .initiative-name[contenteditable="true"]:focus {
+      outline: none;
+      border-bottom: 1px solid #4361ee;
+    }
+
+    .size-badge {
+      width: 32px;
+      height: 24px;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      flex-shrink: 0;
+      cursor: pointer;
+      transition: opacity 0.1s;
+      position: relative;
+    }
+
+    .size-badge:hover { opacity: 0.75; }
+
+    .size-s { background: #e8f5e9; color: #2e7d32; }
+    .size-m { background: #e3f2fd; color: #1565c0; }
+    .size-l { background: #fce4ec; color: #c62828; }
+
+    #sizeDropdownPortal {
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      z-index: 1000;
+      overflow: hidden;
+      display: none;
+    }
+
+    #sizeDropdownPortal.open { display: block; }
+
+    .size-dropdown-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .size-dropdown-option:hover { background: #f5f5f5; }
+
+    .size-dropdown-option .opt-badge {
+      width: 24px;
+      height: 20px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .hours-col {
+      width: 48px;
+      text-align: right;
+      font-size: 13px;
+      color: #555;
+      flex-shrink: 0;
+    }
+
+    .cumulative-col {
+      width: 68px;
+      text-align: right;
+      font-size: 12px;
+      color: #999;
+      flex-shrink: 0;
+      padding-right: 4px;
+    }
+
+    .row-menu-btn {
+      opacity: 0;
+      transition: opacity 0.15s;
+      margin-left: 8px;
+      flex-shrink: 0;
+      width: 28px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      color: #aaa;
+      background: transparent;
+      border: none;
+      font-family: inherit;
+    }
+
+    .initiative-row:hover .row-menu-btn { opacity: 1; }
+    .row-menu-btn:hover { background: #f0f0f0; color: #555; }
+
+    #rowMenuPortal {
+      position: fixed;
+      background: #fff;
+      border: 1px solid #e0e0e0;
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+      z-index: 1000;
+      overflow: hidden;
+      display: none;
+      min-width: 148px;
+    }
+
+    #rowMenuPortal.open { display: block; }
+
+    .row-menu-option {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      white-space: nowrap;
+      color: #333;
+    }
+
+    .row-menu-option:hover { background: #f5f5f5; }
+    .row-menu-option.danger { color: #e63946; }
+    .row-menu-option.danger:hover { background: #fff0f1; }
+
+    /* ── Cutoff Divider ── */
+    .cutoff-divider {
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 10px;
+      margin: 2px 0;
+    }
+
+    .cutoff-divider .line {
+      flex: 1;
+      height: 2px;
+      background: #e63946;
+    }
+
+    .cutoff-divider .label {
+      font-size: 11px;
+      font-weight: 700;
+      color: #e63946;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      white-space: nowrap;
+    }
+
+    /* ── Column Headers ── */
+    .list-col-headers {
+      display: flex;
+      align-items: center;
+      padding: 8px 24px 4px;
+      gap: 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .col-h {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #bbb;
+      font-weight: 600;
+    }
+
+    .col-h-rank { width: 28px; flex-shrink: 0; }
+    .col-h-handle { width: 20px; flex-shrink: 0; }
+    .col-h-name { flex: 1; padding: 0 8px; }
+    .col-h-size { width: 32px; flex-shrink: 0; }
+    .col-h-hrs { width: 48px; text-align: right; flex-shrink: 0; }
+    .col-h-cum { width: 68px; text-align: right; flex-shrink: 0; padding-right: 4px; }
+    .col-h-del { width: 36px; flex-shrink: 0; }
+
+    /* ── Empty State ── */
+    .empty-state {
+      padding: 32px 24px;
+      text-align: center;
+      color: #bbb;
+      font-size: 14px;
+    }
+
+    /* ── Team Section ── */
+    .team-add-form {
+      display: flex;
+      gap: 8px;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+      background: #fafafa;
+      flex-wrap: wrap;
+    }
+
+    .team-add-form input[type="text"] {
+      flex: 1;
+      min-width: 100px;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .team-add-form input[type="text"]:focus { border-color: #4361ee; }
+
+    .team-add-form select {
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-size: 13px;
+      font-family: inherit;
+      background: #fff;
+      outline: none;
+    }
+
+    .team-list { padding: 4px 0; }
+
+    .team-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 20px;
+      border-bottom: 1px solid #f5f5f5;
+    }
+
+    .team-row:last-child { border-bottom: none; }
+
+    .team-name {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .level-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.3px;
+    }
+
+    .level-junior  { background: #fce4ec; color: #880e4f; }
+    .level-mid     { background: #e3f2fd; color: #0d47a1; }
+    .level-senior  { background: #e8f5e9; color: #1b5e20; }
+    .level-lead    { background: #fff8e1; color: #e65100; }
+
+    .team-hours-input {
+      width: 64px;
+      text-align: right;
+      padding: 5px 8px;
+      border: 1px solid #e0e0e0;
+      border-radius: 5px;
+      font-size: 13px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .team-hours-input:focus { border-color: #4361ee; }
+
+    .team-hours-label {
+      font-size: 12px;
+      color: #aaa;
+      width: 22px;
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="sizeDropdownPortal"></div>
+<div id="rowMenuPortal"></div>
+
+<div class="page-header">
+  <h1>Quarterly Design Capacity Planner</h1>
+  <div class="quarter-label">
+    Quarter:&nbsp;<input type="text" id="quarterLabel" placeholder="e.g. Q2 2026" maxlength="20">
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- ── LEFT: Initiatives ── -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Initiatives</h2>
+      <span class="count" id="initiativeCount"></span>
+    </div>
+
+    <!-- Capacity bar -->
+    <div class="summary-grid">
+      <div class="summary-cell available">
+        <div class="label">Available hrs</div>
+        <div class="value" id="summaryAvailable">0</div>
+      </div>
+      <div class="summary-cell committed">
+        <div class="label">Committed hrs</div>
+        <div class="value" id="summaryCommitted">0</div>
+      </div>
+      <div class="summary-cell remaining" id="summaryRemainingCell">
+        <div class="label">Remaining hrs</div>
+        <div class="value" id="summaryRemaining">0</div>
+      </div>
+    </div>
+
+    <!-- Add form -->
+    <div class="add-form">
+      <input type="text" id="newInitiativeName" placeholder="Initiative name…" autocomplete="off">
+      <div class="size-toggle" id="sizeToggle">
+        <label><input type="radio" name="newSize" value="S"><span>S</span></label>
+        <label><input type="radio" name="newSize" value="M" checked><span>M</span></label>
+        <label><input type="radio" name="newSize" value="L"><span>L</span></label>
+      </div>
+      <button class="btn btn-primary" onclick="addInitiative()">Add</button>
+    </div>
+
+    <!-- Column headers -->
+    <div class="list-col-headers">
+      <div class="col-h col-h-rank">#</div>
+      <div class="col-h col-h-handle"></div>
+      <div class="col-h col-h-name">Initiative</div>
+      <div class="col-h col-h-size">Size</div>
+      <div class="col-h col-h-hrs">Hrs</div>
+      <div class="col-h col-h-cum">Cumul.</div>
+      <div class="col-h col-h-del"></div>
+    </div>
+
+    <div class="initiatives-list" id="initiativesList"></div>
+  </div>
+
+  <!-- ── RIGHT: Team Details ── -->
+  <div>
+    <div class="card">
+      <div class="card-header">
+        <h2>Team Details</h2>
+        <span class="count" id="teamCount"></span>
+      </div>
+
+      <div class="team-add-form">
+        <input type="text" id="newMemberName" placeholder="Name…" autocomplete="off">
+        <select id="newMemberLevel">
+          <option value="junior">Junior</option>
+          <option value="mid" selected>Mid</option>
+          <option value="senior">Senior</option>
+          <option value="lead">Lead</option>
+        </select>
+        <button class="btn btn-primary btn-sm" onclick="addTeamMember()" style="padding:8px 12px;">Add</button>
+      </div>
+
+      <div class="team-list" id="teamList"></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // ── Constants ──
+  const SIZE_HOURS = { S: 80, M: 240, L: 480 };
+  const SIZE_LABELS = { S: 'Small — 80h', M: 'Medium — 240h', L: 'Large — 480h' };
+  const LEVEL_DEFAULTS = { junior: 300, mid: 360, senior: 400, lead: 320 };
+  const LEVEL_LABELS = { junior: 'Junior', mid: 'Mid', senior: 'Senior', lead: 'Lead' };
+  const SIZES = ['S', 'M', 'L'];
+
+  // ── State ──
+  let state = {
+    quarter: '',
+    initiatives: [],   // { id, name, size }
+    team: []           // { id, name, level, hours }
+  };
+
+  let dragSrcIndex = null;
+
+  // ── Persistence ──
+  function save() {
+    localStorage.setItem('capacityPlanner_v1', JSON.stringify(state));
+  }
+
+  function load() {
+    const raw = localStorage.getItem('capacityPlanner_v1');
+    if (raw) {
+      try { state = JSON.parse(raw); } catch(e) {}
+    }
+  }
+
+  // ── Derived calculations ──
+  function totalAvailableHours() {
+    return state.team.reduce((sum, m) => sum + (parseInt(m.hours) || 0), 0);
+  }
+
+  function initiativeHours(init) {
+    return SIZE_HOURS[init.size] || 0;
+  }
+
+  // Returns { inScope: [...], cutoffAfter: index or -1, outOfScope: [...], committed: number }
+  function calcScope() {
+    const available = totalAvailableHours();
+    let cumulative = 0;
+    let cutoffAfter = -1; // index of last in-scope item
+
+    for (let i = 0; i < state.initiatives.length; i++) {
+      const hrs = initiativeHours(state.initiatives[i]);
+      cumulative += hrs;
+      if (cumulative <= available) {
+        cutoffAfter = i;
+      } else {
+        break;
+      }
+    }
+
+    // Edge: if available is 0 and initiatives exist, all are out of scope
+    const committed = state.initiatives
+      .slice(0, cutoffAfter + 1)
+      .reduce((s, init) => s + initiativeHours(init), 0);
+
+    return { cutoffAfter, committed };
+  }
+
+  // ── Render Initiatives ──
+  function renderInitiatives() {
+    const list = document.getElementById('initiativesList');
+    const { cutoffAfter, committed } = calcScope();
+    const available = totalAvailableHours();
+    const remaining = available - committed;
+    const total = state.initiatives.length;
+
+    // Summary
+    document.getElementById('summaryAvailable').textContent = available;
+    document.getElementById('summaryCommitted').textContent = committed;
+    document.getElementById('summaryRemaining').textContent = remaining;
+    const remainingCell = document.getElementById('summaryRemainingCell');
+    remainingCell.classList.toggle('over', remaining < 0);
+
+    document.getElementById('initiativeCount').textContent =
+      total ? `${cutoffAfter + 1} of ${total} in scope` : '';
+
+    if (total === 0) {
+      list.innerHTML = '<div class="empty-state">No initiatives yet. Add one above.</div>';
+      return;
+    }
+
+    let html = '';
+    let cumulative = 0;
+    let cutoffInserted = false;
+
+    for (let i = 0; i < state.initiatives.length; i++) {
+      const init = state.initiatives[i];
+      const hrs = initiativeHours(init);
+      cumulative += hrs;
+      const inScope = i <= cutoffAfter;
+
+      // Insert cutoff divider after the last in-scope item
+      if (!cutoffInserted && i > cutoffAfter && cutoffAfter >= -1) {
+        if (available > 0 || i === 0) {
+          html += `
+            <div class="cutoff-divider">
+              <div class="line"></div>
+              <div class="label">Capacity limit — out of scope below</div>
+              <div class="line"></div>
+            </div>`;
+          cutoffInserted = true;
+        }
+      }
+
+      // If no in-scope items, show divider before first item
+      if (!cutoffInserted && i === 0 && cutoffAfter === -1) {
+        html += `
+          <div class="cutoff-divider">
+            <div class="line"></div>
+            <div class="label">Capacity limit — all out of scope</div>
+            <div class="line"></div>
+          </div>`;
+        cutoffInserted = true;
+      }
+
+      html += `
+        <div class="initiative-row ${inScope ? '' : 'out-of-scope'}"
+             draggable="true"
+             data-index="${i}"
+             ondragstart="onDragStart(event, ${i})"
+             ondragover="onDragOver(event)"
+             ondrop="onDrop(event, ${i})"
+             ondragleave="onDragLeave(event)"
+             ondragend="onDragEnd(event)">
+          <div class="rank">${i + 1}</div>
+          <div class="drag-handle">⠿</div>
+          <div class="initiative-name"
+               contenteditable="true"
+               data-index="${i}"
+               onblur="renameInitiative(${i}, this.textContent)"
+               onkeydown="if(event.key==='Enter'){event.preventDefault();this.blur();}"
+               >${escHtml(init.name)}</div>
+          <div class="size-badge size-${init.size.toLowerCase()}"
+               title="Change size"
+               onclick="toggleSizeDropdown(event, ${i})">${init.size}</div>
+          <div class="hours-col">${hrs}h</div>
+          <div class="cumulative-col">${cumulative}h</div>
+          <button class="row-menu-btn" onclick="toggleRowMenu(event, ${i})" title="More options">···</button>
+        </div>`;
+    }
+
+    // If all items are in scope, no divider was inserted — that's correct (no cutoff line needed)
+
+    list.innerHTML = html;
+  }
+
+  // ── Render Team ──
+  function renderTeam() {
+    const list = document.getElementById('teamList');
+    const count = state.team.length;
+    document.getElementById('teamCount').textContent = count ? `${count} designer${count !== 1 ? 's' : ''}` : '';
+
+    if (count === 0) {
+      list.innerHTML = '<div class="empty-state">No team members yet.</div>';
+      return;
+    }
+
+    list.innerHTML = state.team.map((m, i) => `
+      <div class="team-row">
+        <div class="team-name">${escHtml(m.name)}</div>
+        <div class="level-badge level-${m.level}">${LEVEL_LABELS[m.level]}</div>
+        <input class="team-hours-input"
+               type="number"
+               min="0"
+               max="2000"
+               value="${m.hours}"
+               title="Quarterly hours"
+               onchange="updateMemberHours(${i}, this.value)">
+        <div class="team-hours-label">hrs</div>
+        <button class="btn btn-danger btn-sm" onclick="deleteTeamMember(${i})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  function render() {
+    renderInitiatives();
+    renderTeam();
+  }
+
+  // ── Initiatives CRUD ──
+  function addInitiative() {
+    const nameEl = document.getElementById('newInitiativeName');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+
+    const size = document.querySelector('input[name="newSize"]:checked').value;
+
+    state.initiatives.push({ id: uid(), name, size });
+    nameEl.value = '';
+    nameEl.focus();
+    save();
+    render();
+  }
+
+  function deleteInitiative(index) {
+    state.initiatives.splice(index, 1);
+    save();
+    render();
+  }
+
+  function renameInitiative(index, rawText) {
+    const name = rawText.trim();
+    if (name && state.initiatives[index]) {
+      state.initiatives[index].name = name;
+      save();
+      render();
+    }
+  }
+
+  let openDropdownIndex = null;
+  let openRowMenuIndex = null;
+
+  function toggleSizeDropdown(e, index) {
+    e.stopPropagation();
+    const portal = document.getElementById('sizeDropdownPortal');
+    if (openDropdownIndex === index) {
+      closeAllSizeDropdowns();
+      return;
+    }
+    openDropdownIndex = index;
+    portal.innerHTML = SIZES.map(s => `
+      <div class="size-dropdown-option" onclick="selectSize(event, ${index}, '${s}')">
+        <div class="opt-badge size-${s.toLowerCase()}">${s}</div>
+        <span>${SIZE_LABELS[s]}</span>
+      </div>`).join('');
+    const rect = e.currentTarget.getBoundingClientRect();
+    portal.style.top = (rect.bottom + 4) + 'px';
+    portal.style.left = (rect.left + rect.width / 2) + 'px';
+    portal.style.transform = 'translateX(-50%)';
+    portal.classList.add('open');
+  }
+
+  function selectSize(e, index, size) {
+    e.stopPropagation();
+    state.initiatives[index].size = size;
+    closeAllSizeDropdowns();
+    save();
+    render();
+  }
+
+  function closeAllSizeDropdowns() {
+    const portal = document.getElementById('sizeDropdownPortal');
+    portal.classList.remove('open');
+    openDropdownIndex = null;
+  }
+
+  function toggleRowMenu(e, index) {
+    e.stopPropagation();
+    const portal = document.getElementById('rowMenuPortal');
+    if (openRowMenuIndex === index) {
+      closeRowMenu();
+      return;
+    }
+    closeAllSizeDropdowns();
+    openRowMenuIndex = index;
+    const total = state.initiatives.length;
+    portal.innerHTML = `
+      <div class="row-menu-option" onclick="rowMenuAction(event, ${index}, 'top')">↑ Send to top</div>
+      <div class="row-menu-option" onclick="rowMenuAction(event, ${index}, 'bottom')">↓ Send to bottom</div>
+      <div class="row-menu-option danger" onclick="rowMenuAction(event, ${index}, 'delete')">✕ Delete</div>
+    `;
+    const rect = e.currentTarget.getBoundingClientRect();
+    portal.style.top = (rect.bottom + 4) + 'px';
+    portal.style.left = (rect.right) + 'px';
+    portal.style.transform = 'translateX(-100%)';
+    portal.classList.add('open');
+  }
+
+  function rowMenuAction(e, index, action) {
+    e.stopPropagation();
+    closeRowMenu();
+    if (action === 'delete') {
+      state.initiatives.splice(index, 1);
+    } else if (action === 'top') {
+      const [item] = state.initiatives.splice(index, 1);
+      state.initiatives.unshift(item);
+    } else if (action === 'bottom') {
+      const [item] = state.initiatives.splice(index, 1);
+      state.initiatives.push(item);
+    }
+    save();
+    render();
+  }
+
+  function closeRowMenu() {
+    const portal = document.getElementById('rowMenuPortal');
+    portal.classList.remove('open');
+    openRowMenuIndex = null;
+  }
+
+  // ── Team CRUD ──
+  function addTeamMember() {
+    const nameEl = document.getElementById('newMemberName');
+    const name = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+
+    const level = document.getElementById('newMemberLevel').value;
+    state.team.push({ id: uid(), name, level, hours: LEVEL_DEFAULTS[level] });
+    nameEl.value = '';
+    nameEl.focus();
+    save();
+    render();
+  }
+
+  function deleteTeamMember(index) {
+    state.team.splice(index, 1);
+    save();
+    render();
+  }
+
+  function updateMemberHours(index, value) {
+    state.team[index].hours = Math.max(0, parseInt(value) || 0);
+    save();
+    render();
+  }
+
+  // ── Drag & Drop ──
+  function onDragStart(e, index) {
+    dragSrcIndex = index;
+    e.currentTarget.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+  }
+
+  function onDragOver(e) {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    e.currentTarget.classList.add('drag-over');
+  }
+
+  function onDragLeave(e) {
+    e.currentTarget.classList.remove('drag-over');
+  }
+
+  function onDrop(e, targetIndex) {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
+    if (dragSrcIndex === null || dragSrcIndex === targetIndex) return;
+
+    const moved = state.initiatives.splice(dragSrcIndex, 1)[0];
+    state.initiatives.splice(targetIndex, 0, moved);
+    dragSrcIndex = null;
+    save();
+    render();
+  }
+
+  function onDragEnd(e) {
+    e.currentTarget.classList.remove('dragging');
+    document.querySelectorAll('.initiative-row').forEach(r => r.classList.remove('drag-over'));
+    dragSrcIndex = null;
+  }
+
+  // ── Close dropdowns on outside click ──
+  document.addEventListener('click', () => { closeAllSizeDropdowns(); closeRowMenu(); });
+
+  // ── Quarter label ──
+  document.getElementById('quarterLabel').addEventListener('input', function() {
+    state.quarter = this.value;
+    save();
+  });
+
+  // ── Enter key shortcuts ──
+  document.getElementById('newInitiativeName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addInitiative(); }
+  });
+
+  document.getElementById('newMemberName').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); addTeamMember(); }
+  });
+
+  // ── Utilities ──
+  function uid() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+  }
+
+  function escHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str;
+    return d.innerHTML;
+  }
+
+  // ── Default initiatives ──
+  const DEFAULT_INITIATIVES = [
+    { name: 'https://docs.google.com/spreadsheets/d/1Lyi34WqzCZcAEzba4kYWHQ7ZGqL3sPw8dgZN4DHWOYs/edit?gid=1461204500#gid=1461204500', size: 'L' },
+    { name: 'WSJ iOS Mobile App - PIANO - Dual CTA on Articles', size: 'M' },
+    { name: 'WSJ Android Mobile App - PIANO - Dual CTA on Articles', size: 'S' },
+    { name: 'WSJ Android Mobile App - PIANO Banner in App', size: 'S' },
+    { name: 'WSJ iOS Mobile App - PIANO - Banner in App', size: 'S' },
+    { name: 'Braze CRM: WSJ In-App Content Cards', size: 'M' },
+    { name: 'BIC - Splash Page + Shop Page Redesign', size: 'L' },
+    { name: 'WSJ+ Marketplace - Selling Partner Subs', size: 'S' },
+    { name: 'CAJ (Checkout) Modernization - Mobile and Desktop', size: 'S' },
+    { name: 'ALL Brands Ongoing [Quarterly] Shop Page Testing', size: 'M' },
+    { name: 'ALL Brands Ongoing [Quarterly] Cancellation Flow Testing', size: 'S' },
+    { name: 'Reactive UX Touchpoints', size: 'M' },
+    { name: 'ALL Brands Ongoing [Quarterly] Onboarding Flow Testing', size: 'M' },
+    { name: 'Thank You Page - Refresh UX', size: 'M' },
+    { name: 'Family Plan Subscription', size: 'L' },
+    { name: 'MarketWatch Next Gen: Commerce Discovery', size: 'S' },
+    { name: 'Delta Partnership', size: 'M' },
+    { name: 'Retention Work: Decision Tree Test within the Cancel Flow', size: 'S' },
+    { name: 'WSJ Free Reg to Paid Sub Conversion Optimization', size: 'M' },
+    { name: "Barron's Product Ecosystem Shop Page", size: 'M' },
+    { name: 'Paywall CVR Optimization', size: 'S' },
+    { name: 'WSJ+ BYOB Onsite Promotion', size: 'M' },
+    { name: 'POST MVP - Android - Phase 1 Barron\'s Next Gen Post-Purchase Onboarding', size: 'S' },
+    { name: 'POST MVP - iOS - Phase 1 Barron\'s Next Gen Post-Purchase Onboarding', size: 'S' },
+    { name: 'WSJ Shop Creative Alignment Test', size: 'M' },
+    { name: 'Downgrade Test, UI/UX test', size: 'S' },
+    { name: 'Enterprise Corp Subs - Refreshed WSJ, Barron\'s, MKW Webpages', size: 'L' },
+    { name: "Barron's Default Paywall Optimization", size: 'M' },
+    { name: 'W&I Onboarding Management', size: 'S' },
+    { name: 'Reduce Friction in Registration Funnel', size: 'M' },
+    { name: '"Product Recommender" Upsell Assets', size: 'S' },
+  ];
+
+  // ── Boot ──
+  load();
+  if (state.initiatives.length === 0) {
+    state.initiatives = DEFAULT_INITIATIVES.map(d => ({ id: uid(), name: d.name, size: d.size }));
+    save();
+  }
+  document.getElementById('quarterLabel').value = state.quarter || '';
+  render();
+</script>
+</body>
+</html>
