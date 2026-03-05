@@ -46,9 +46,9 @@ The primary working area. A dynamic, drag-and-drop ordered list of design initia
 
 | Size | Hours |
 |---|---|
-| S | 8 |
-| M | 16 |
-| L | 40 |
+| S | 80 |
+| M | 240 |
+| L | 480 |
 
 **Capacity cutoff line:**
 
@@ -97,6 +97,10 @@ A roster of the product design team that drives total available capacity for the
 - Add a team member (name + level) via an inline form
 - Remove any team member
 - Edit any individual's quarterly hours directly in the roster
+
+**Lock / unlock:**
+
+The Team Details section has a password-protected lock. The section renders locked by default on page load (add, remove, and hours-edit controls are disabled). Clicking the lock icon prompts for a password; on success the section unlocks for editing. Clicking the icon again re-locks without a password prompt. The lock state is session-only — it resets to locked on every page load.
 
 **Capacity summary** (displayed within or adjacent to Team Details):
 
