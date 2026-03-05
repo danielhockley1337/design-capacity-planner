@@ -4,7 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-A standalone, browser-based quarterly design capacity planning tool for the Dow Jones product design team. No build step, no dependencies, no backend.
+A standalone, browser-based quarterly design capacity planning tool for the Dow Jones product design team. Built for use during quarterly planning sessions where the product design team and marketing stakeholders collaboratively force-rank design initiatives and determine what can realistically be delivered given team capacity.
+
+**Owner:** Daniel Hockley, VP of Product for Commerce, Dow Jones
+**Users:** Product design team, marketing stakeholders, VP of Product
+**Status:** Draft / active development
+
+No build step, no dependencies, no backend.
 
 ## Running the Tool
 
