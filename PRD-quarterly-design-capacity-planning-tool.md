@@ -60,7 +60,7 @@ On first load (no `localStorage` data), the tool pre-populates a set of named in
 
 **Initiative management:**
 
-- Add a new initiative (name + size) via an inline form at the top or bottom of the list
+- Add a new initiative (name + size) via an inline form at the top of the list
 - Reorder by dragging
 - Each row has a `···` menu (visible on hover) with the following options:
   - **Send to top** — moves the initiative to rank 1
@@ -73,48 +73,38 @@ Clicking the size badge on an initiative opens a small dropdown showing all thre
 
 ---
 
-### 2. Team Details
+### 2. Capacity
 
-A roster of the product design team that drives total available capacity for the quarter.
+A list of named hour allocations that collectively define total available team capacity for the quarter. The section header is labelled **"Capacity"** in the UI.
 
-**Team member record:**
+**Allocation record:**
 
 | Field | Description |
 |---|---|
-| Name | Designer's name |
-| Level | Junior / Mid / Senior / Lead |
-| Quarterly Hours | Auto-populated from level defaults; editable per person |
+| Name | Free-text label for the allocation (e.g. a designer's name, a shared pool) |
+| Quarterly Hours | Editable numeric value; defaults to 2,000 hours on add |
 
-**Default quarterly hours by level:**
+There are no levels or role-based defaults. Each allocation is a simple name + hours pair. The default on add is 2,000 hours; this is editable directly in the roster.
 
-| Level | Default Hours/Quarter |
-|---|---|
-| Junior | 300 |
-| Mid | 360 |
-| Senior | 400 |
-| Lead | 320 |
+**Capacity management:**
 
-> Lead hours are lower by default to account for non-IC responsibilities (rituals, mentoring, reviews). All defaults are editable per person.
-
-**Team management:**
-
-- Add a team member (name + level) via an inline form
-- Remove any team member
-- Edit any individual's quarterly hours directly in the roster
+- Add an allocation (name only) via an inline form; hours default to 2,000 and can be edited immediately
+- Remove any allocation via a delete button on each row
+- Edit any allocation's quarterly hours directly in the roster
 
 **Lock / unlock:**
 
-The Team Details section has a password-protected lock. The section renders locked by default on page load (add, remove, and hours-edit controls are disabled). Clicking the lock icon prompts for a password; on success the section unlocks for editing. Clicking the icon again re-locks without a password prompt. The lock state is session-only — it resets to locked on every page load.
+The Capacity section has a password-protected lock. The section renders locked by default on page load (add, remove, and hours-edit controls are disabled). Clicking the lock icon prompts for a password; on success the section unlocks for editing. Clicking the icon again re-locks without a password prompt. The lock state is session-only — it resets to locked on every page load.
 
-**Capacity summary** (displayed within or adjacent to Team Details):
+**Capacity summary** (displayed at the top of the Initiatives card, above the add form):
 
 | Metric | Value |
 |---|---|
-| Total Available Hours | Sum of all team members' quarterly hours |
-| Hours Committed | Sum of hours for all In Scope initiatives |
-| Hours Remaining | Total Available − Hours Committed |
+| Available hrs | Sum of all allocations' quarterly hours |
+| Committed hrs | Sum of hours for all In Scope initiatives |
+| Remaining hrs | Available − Committed (turns red if negative) |
 
-All three values update in real time.
+All three values update in real time. The counter in the Capacity card header shows the number of allocations (e.g. "3 allocations").
 
 ---
 
@@ -139,14 +129,11 @@ All three values update in real time.
 
 ## Quarter History
 
-The tool supports saving and reloading previous quarters for reference.
-
-- The current quarter's state is **automatically saved** to history when the quarter label is changed (e.g. typing "Q3 2026" archives the current state as the previous quarter)
-- A **dropdown selector** in the page header allows loading any previously saved quarter
-- Loaded past quarters are **editable**, not read-only
+Quarter history is **not yet implemented**. The quarter label input in the page header saves to `localStorage` alongside the rest of the state, but there is no archiving, history selector, or cross-quarter comparison in the current version.
 
 ## Open Questions
 
 - ~~Should the tool support a quarter label (e.g. "Q2 2026") for context during stakeholder sessions?~~ *(Implemented)*
-- ~~Should there be a way to archive or compare previous quarters?~~ *(Resolved — see Quarter History above)*
+- Should there be a way to archive or compare previous quarters? *(Not yet implemented — previously marked resolved in error)*
 - ~~Should initiatives support an optional description or notes field?~~ *(Resolved — not needed)*
+- Should level-based defaults be re-introduced to the Capacity section, or is the simplified flat-allocation model sufficient?
